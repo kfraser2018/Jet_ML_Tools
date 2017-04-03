@@ -1,6 +1,7 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D, SpatialDropout2D
+from keras.layers import Convolution2D, MaxPooling2D, SpatialDropout2D, LocallyConnected2D, ZeroPadding2D
+from utils import *
 from os.path import basename
 
 def conv_net_construct(hps):
@@ -48,6 +49,7 @@ def conv_net_construct(hps):
 
     return model
 
+
 def dense_net_construct(hps, AE = False):
     layer_dims = hps['layer_dims']
     input_dim = hps['input_dim']
@@ -76,5 +78,86 @@ def dense_net_construct(hps, AE = False):
     return model
 
 
+def pileup_model(hps):
 
+    img_size     =  hps['img_size']
+    nb_channels  =  hps['nb_channels']
+    
+    filter_size  =  parg(hps['filter_size'])
+    nb_filters   =  parg(hps['nb_filters'])
+    stride       =  parg(hps['stride'])
+    layers       =  parg(hps['layers'])
+    zero_pad     =  hps.setdefault('zero_pad', stride[0])
 
+    proj_layer   =  hps.setdefault('proj_layer', Convolution2D)
+ 
+    model = Sequential()
+    
+    for i in range(len(layers)):
+        if i == 0:
+            model.add(ZeroPadding2D(padding = (zero_pad, zero_pad),
+                                    input_shape = (nb_channels, img_size, img_size)))
+            model.add(layers[i](nb_filters[i], filter_size[i], filter_size[i], 
+                                subsample = (stride[i], stride[i]),
+                                init = 'he_uniform', border_mode = 'valid')) 
+        else:
+            model.add(layers[i](nb_filters[i], filter_size[i], filter_size[i], 
+                                subsample = (stride[i], stride[i]),
+                                init = 'he_uniform', border_mode = 'valid')) 
+        model.add(Activation('relu'))
+
+    if nb_filters[len(layers)-1] > 1:
+        model.add(proj_layer(1, 1, 1, init = 'he_uniform', border_mode = 'valid', activation = 'relu'))
+
+    model.compile(loss = 'mse', optimizer = 'adam')
+    model.summary()
+    return model
+
+hps_examples = {
+
+    'hps_1layer_conv': {
+        'filter_size': 5,
+        'img_size': 45,
+        'nb_filters': 1,
+        'stride': 5,
+        'nb_channels': 3,
+        'layers': [Convolution2D],
+    },
+
+    'hps_2layer_conv_large': {
+        'filter_size': [8, 3],
+        'img_size': 45,
+        'nb_filters': [1, 1],
+        'stride': [2,2],
+        'nb_channels': 3,
+        'layers': [Convolution2D, Convolution2D],
+    },
+
+    'hps_2layer_conv_med': {
+        'filter_size': [4, 5],
+        'img_size': 45,
+        'nb_filters': [1, 1],
+        'stride': [2,2],
+        'nb_channels': 3,
+        'layers': [Convolution2D, Convolution2D],
+    },
+
+    'hps_1layer_conv_multichan': {
+        'filter_size': 5,
+        'img_size': 45,
+        'nb_filters': 2,
+        'stride': 5,
+        'nb_channels': 3,
+        'layers': [Convolution2D]
+    },
+
+    'hps_2layer_conv_multichan': {
+        'filter_size': [8, 3],
+        'img_size': 45,
+        'nb_filters': [2, 2],
+        'stride': [2,2],
+        'nb_channels': 3,
+        'layers': [Convolution2D, Convolution2D]
+    },
+
+}

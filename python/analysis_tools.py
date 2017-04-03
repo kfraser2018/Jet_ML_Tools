@@ -3,7 +3,6 @@
 # A collection of functions for analyzing the output of a binary classifier.
 # Includes functions for constructing ROC curve, plotting them, saving them,
 # and computing derived curves from them.
-#
 
 
 import numpy as np

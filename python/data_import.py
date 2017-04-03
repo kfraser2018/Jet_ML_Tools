@@ -1,74 +1,69 @@
-# Patrick Komiske, MIT, 2017
-#
-# Function for importing jet images from multiple .npz files into one numpy
-# array. Tries to be efficient by allocating all necessary memory at the 
-# beginning. Can also read in events assuming a csv style file format with
-# an extra newline per event, particles listed one per line, comments 
-# beginning with a '#', and lines denoting overal jet properties beginning
-# with 'Event #, [jet_rap], [jet_phi], [jet_pt]'.
+# Patrick Komiske, Eric Metodiev, MIT, 2017
 
-
-import numpy as np
-import csv
-import os
 from utils import *
 
-def data_import(data_type, seed_range, path = '', 
-                nevents = 10000, img_size = 33, channels = [0]):
+def sample_poisson(mean, n_samples, min_val, max_val):
 
-    """ Imports data produced by the Events.cc script into python. Note that both
-    gluon and quark files must be present for the desired seed range. The gluons 
-    are always listed before the quarks. We assume a constant number of events
-    per file.
+    assert min_val <= mean <= max_val
+    count = 0
+    samples = []
+    while count < n_samples:
+        sample = np.random.poisson(lam = mean, size = 1)
+        if sample <= max_val and sample >= min_val:
+            samples.append(sample)
+            count += 1
+    return np.sort(samples)
 
-    data_type: Either 'jetimage' or 'event'. These
-               respectively return a numpy array of jet images and a list of events with their particle constituents and a separate
-               list of the overall jet four-vectors.
-    seed_range: a list or other iterable object containing the seeds for each file
-    path: path to directory with the files. Defaults to '../events' and 
-          '../images' for the type possible data_types.
-    nevents: number of events per file. Note that this needs to be constant across
-             the files.
-    img_size: the image size of the jet images.
-    channels: the channels of the jet image to return.
-    """
+def import_poisson_events(filename, mean_NPU, n_events, min_NPU, max_NPU, file_size, comment_char):
 
-    assert data_type in ['jetimage', 'event'], 'data_type not recognized'
+    events, jets_info = [], []
+    
+    # draw the NPUs to use from a Poissonian with caps at max_NPU and min_NPU
+    NPUs = sample_poisson(mean_NPU, n_events, min_NPU, max_NPU)
+    NPU_set = set(NPUs)
+   
+    for NPU in NPU_set:
 
-    if len(path) == 0:
-        path = '../events' if data_type == 'event' else '../images'
+        # number to draw from the file with this NPU
+        num = np.count_nonzero(NPUs == NPU)
+        
+        # check if the number of requested events is compatible
+        if num >= file_size:
+            print('Warning: Trying to draw more events than file contained!')
 
-    if data_type == 'jetimage':
-        jetimages = np.zeros((2 * nevents * len(seed_range), len(channels), img_size, img_size))
-        start = 0
-    elif data_type == 'event':
-        jets = []
-        jet_tots = []
+        events_n, jets_info_n = import_single_file(filename, num = num, comment_char = comment_char)
 
-    for particle_type in ['gluon', 'quark']:
-        for index in seed_range:
-            filename = particle_type + '-' + data_type + '-seed' + str(index)
-            if data_type == 'jetimage':
-                jetimages[start:start+nevents, channels] = \
-                        np.load(os.path.join(path, filename + '.npz'))['arr_0'][:, channels]
-                start += nevents
+        events.extend(events_n)
+        jets_info.extend(jets_info_n)
 
-            elif data_type == 'event':
-                with open(os.path.join(path, filename + '.txt'), 'r') as fh:
-                    reader = csv.reader(fh)
-                    jet = []
-                    for row in reader:
-                        if len(row) > 0 and '#' in row[0]:
-                            continue
-                        if len(row) > 0 and 'Event' in row[0]:
-                            jet_tots.append(list(map(float, row[1:])))
-                        elif len(row) == 0:
-                            jets.append(np.asarray(jet))
-                            jet = []
-                        else:
-                            jet.append(list(map(float, row)))
+    return np.asarray(events), np.asarray(jets_info)
 
-    if data_type == 'jetimage':
-        return jetimages
-    elif data_type == 'event':
-        return jets, jet_tots
+def import_single_file(filename, num = -1, comment_char = '#'):
+
+    events, jets_info = [], []
+
+    with open(filename, 'r') as f:
+        for i, row in enumerate(f):
+            
+            if row[0] == comment_char: 
+                continue
+
+            # read out the first num pairs of jets in the event
+            if i == 2*num:
+                break
+
+            # split the event record up into parts separated by spaces
+            parts = np.array(row.split()).astype(float)    
+
+            # jet_info: ij, NPU, rho, A, JpT, Jeta, Jphi, Jm
+            jet_info = parts[:8]
+
+            # event: pt, eta, phi, is_charged, vertex, PUPPI, SoftKiller
+            event = parts[8:].reshape((int(len(parts[8:])/7), 7))
+
+            events.append(event)
+            jets_info.append(jet_info)
+
+    return np.asarray(events), np.asarray(jets_info)
+
+

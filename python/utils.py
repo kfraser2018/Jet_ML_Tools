@@ -5,8 +5,7 @@
 #
 
 import sys
-from os.path import join
-from os import listdir
+import os
 import numpy as np
 
 
@@ -36,8 +35,7 @@ def to_categorical(vector, num_cat):
     where for each sample the label is a list of zeros with a one in the 
     position corresponding to the class label. """
 
-    return np.asarray([[1 if x == n else 0 for n in range(num_cat)] \
-                                                    for x in vector])
+    return np.asarray([[1 if x == n else 0 for n in range(num_cat)] for x in vector])
 
 
 def get_unique_file_name(path, filename, suffix):
@@ -48,7 +46,7 @@ def get_unique_file_name(path, filename, suffix):
     incrementing starting from 0. """
 
     counter = 0
-    files = listdir(path)
+    files = os.listdir(path)
     while counter < 10000:
         trial_name = filename + '_{}'.format(counter)
         if trial_name + suffix not in files:

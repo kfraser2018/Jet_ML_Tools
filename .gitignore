@@ -4,3 +4,10 @@
 .ipynb_checkpoints
 events
 Benchmarking.ipynb
+dijets
+refs
+models
+plots
+analysiscode
+GenerationCode
+*.ipynb

@@ -1,35 +1,33 @@
-# Makefile to compile Events.cc
-
-CXX=g++
+CXX = g++
 ifeq ($(shell uname), Darwin)
   CXX = clang++
 endif
 
-CXXFLAGS = -O2 -Wall -std=c++0x
-
-INCLUDE   += -DHAVEBOOST
-LIBRARIES += -lboost_iostreams
+CXXFLAGS = -O3 -Wall -std=c++11
 
 FASTJETINC = $(shell fastjet-config --cxxflags)
 PYTHIA8INC = $(shell pythia8-config --cxxflags)
+ROOTINC    = $(shell root-config --cflags)
 
-FASTJETLIB = $(shell fastjet-config --libs)
+FASTJETLIB = $(shell fastjet-config --libs) -lSoftKiller
 PYTHIA8LIB = $(shell pythia8-config --libs)
-LIBRARIES += $(FASTJETLIB) $(PYTHIA8LIB)
-INCLUDE   += $(FASTJETINC) $(PYTHIA8INC)
+ROOTLIB    = $(shell root-config --libs)
+LIBRARIES += $(FASTJETLIB) $(PYTHIA8LIB) $(ROOTLIB)
 
+all: 
+	make dijets
 
-events: Events.o CmdLine.o CleverStream.o
+dijets: dijets.o CmdLine.o PUPPI.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBRARIES)
 
-Events.o: Events.cc
-	$(CXX) $(INCLUDE) -o $@ $< -c $(CXXFLAGS)
+dijets.o: dijets.cc FJUI.hh PUPPI.hh
+	$(CXX) $(FASTJETINC) $(PYTHIA8INC) $(ROOTINC) -o $@ $< -c $(CXXFLAGS)
+
+PUPPI.o: PUPPI.cc PUPPI.hh FJUI.hh
+	$(CXX) $(ROOTINC) $(FASTJETINC) -o $@ $< -c $(CXXFLAGS)
 
 CmdLine.o: CmdLine.cc CmdLine.hh
 	$(CXX) -o $@ $< -c $(CXXFLAGS)
 
-CleverStream.o: CleverStream.cc CleverStream.hh
-	$(CXX) -o $@ $< -c $(CXXFLAGS)
-
 clean :
-	rm -fv events *.o
+	rm -fv dijets *.o
