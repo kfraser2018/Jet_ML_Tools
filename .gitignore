@@ -2,5 +2,9 @@
 *~
 **/__pycache__
 .ipynb_checkpoints
-events
-Benchmarking.ipynb
+*.ipynb
+bin/*
+obj/*
+models/*
+plots/*
+

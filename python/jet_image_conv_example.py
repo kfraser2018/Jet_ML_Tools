@@ -24,8 +24,8 @@ hps = {
     'nb_filters': [64, 64, 64],
     'nb_neurons': 128,
     'nb_pool': [2, 2, 2],
-    'dropout': [.25, .5, .5, .5],
-    'patience': 3,
+    'dropout': [.2, .2, .2, .2],
+    'patience': 5,
     'nb_channels': 1,
     'model_name': 'Conv_Net_Example'
 }
