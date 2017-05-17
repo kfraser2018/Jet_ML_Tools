@@ -3,8 +3,4 @@
 **/__pycache__
 .ipynb_checkpoints
 *.ipynb
-bin/*
-obj/*
-models/*
-plots/*
 
