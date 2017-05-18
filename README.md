@@ -25,7 +25,7 @@ To learn about quantum field theory and the standard model, read:
 
 As you'll see, Keras lets you quickly implement and train the architecture you want. You can essentially add layers to your neural network in Keras with lines like `model.add(Dense(50))`.
 
-##### C++ and Pythia
+##### Pythia
 
 Pythia was the high priestess in the Temple of Apollo at Dephi, more commonly known as the Oracle of Delphi. 
 
