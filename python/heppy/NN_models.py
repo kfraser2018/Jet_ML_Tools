@@ -9,7 +9,7 @@ from keras.layers import Dense, Dropout, Activation, Flatten, Conv2D, MaxPooling
 from keras.optimizers import Adam
 from keras import backend as K
 
-import utils
+from .utils import *
 
 # ensure Theano dimension ordering
 K.set_image_data_format('channels_first')
@@ -49,7 +49,7 @@ def conv_net_construct(hps):
     
     model.add(Flatten())
 
-    for n,d in zip(utils.parg(nb_neurons), dropout[3:]):
+    for n,d in zip(parg(nb_neurons), dropout[3:]):
         model.add(Dense(n, activation = act))
         model.add(Dropout(d))
 

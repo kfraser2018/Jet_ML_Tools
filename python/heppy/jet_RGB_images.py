@@ -2,33 +2,17 @@
 #
 # Contains several useful functions for creating/modifying jet images.
 
-import utils
+from .utils import *
 from time import clock
 
 # mapping from particle id to charge of the particle 
-charge_map = {
-                   11: -1, 
-                  -11:  1, 
-                   13: -1, 
-                  -13:  1, 
-                   22:  0, 
-                  -22:  0, 
-                  111:  0, 
-                 -111:  0, 
-                  130:  0, 
-                 -130:  0, 
-                  211:  1, 
-                 -211: -1, 
-                  321:  1, 
-                 -321: -1, 
-                 2112:  0, 
-                -2112:  0, 
-                 2212:  1, 
-                -2212: -1
-             }
+charge_map = {11: -1, -11:  1, 13: -1, -13:  1, 22:  0, -22:  0, 
+              111:  0, -111:  0, 130:  0, -130:  0, 211:  1, -211: -1, 
+              321:  1, -321: -1, 2112:  0, -2112:  0, 2212:  1, -2212: -1}
 
 
-def pixelate(jet, jet_center = [], img_size = 33, img_width = 0.4, nb_chan = 1, norm = True, rap_i=0, phi_i=1, pT_i=2):
+def pixelate(jet, jet_center = [], img_size = 33, img_width = 0.4, nb_chan = 1, norm = True, 
+             rap_i=0, phi_i=1, pT_i=2, centers = False):
 
     """ A function for creating a jet image from a list of particles.
 
@@ -116,14 +100,15 @@ def pixelate(jet, jet_center = [], img_size = 33, img_width = 0.4, nb_chan = 1, 
 
     # L1-normalize the pt channels of the jet image
     if norm:
-        try:
-            jet_image[:num_pt_chans] = jet_image[:num_pt_chans]/\
-                                       np.sum(jet_image[:num_pt_chans])
-        except FloatingPointError:
-            sys.stderr.write('ERROR: No particles in image!\n')
+        normfactor = np.sum(jet_image[:num_pt_chans])
+        if normfactor == 0:
+            sys.stderr.write('ERROR: Image had no particles!')
             sys.stderr.flush()
+            return np.zeros((nb_chan, img_size, img_size))
+        else:
+            jet_image[:num_pt_chans] = jet_image[:num_pt_chans]/normfactor
 
-    if len(jet_center) == 0:
+    if len(jet_center) == 0 and centers:
         return jet_image, (rap_avg, phi_avg)
     else:
         return jet_image
@@ -165,11 +150,11 @@ def write_images_to_file(base_name, images, path = '../images',
     """
 
     ts = clock()
-    utils.fprint('Writing images for {} to file ... '.format(base_name))
+    fprint('Writing images for {} to file ... '.format(base_name))
     filename = os.path.join(path, (base_name + addendum).format(
                                     len(images[0][0]), len(images[0])))
     np.savez_compressed(filename, images)
-    utils.fprint('Done, in {:.3f} seconds.\n'.format(clock() - ts))
+    fprint('Done, in {:.3f} seconds.\n'.format(clock() - ts))
 
 
 def load_images(gluon_img_files, quark_img_files, nb_gluons, nb_quarks, 
@@ -188,12 +173,12 @@ def load_images(gluon_img_files, quark_img_files, nb_gluons, nb_quarks,
     images = np.zeros((nb_gluons + nb_quarks, nb_chan, img_size, img_size))
 
     index = 0
-    for gluon_file in utils.parg(gluon_img_files):
+    for gluon_file in parg(gluon_img_files):
         local_images = np.load(os.path.join(path, gluon_file))['arr_0']
         images[index:index+local_images.shape[0]] = local_images
         index += local_images.shape[0]
 
-    for quark_file in utils.parg(quark_img_files):
+    for quark_file in parg(quark_img_files):
         local_images = np.load(os.path.join(path, quark_file))['arr_0']
         images[index:index+local_images.shape[0]] = local_images
         index += local_images.shape[0]
@@ -213,7 +198,7 @@ def make_labels(nb_gluons, nb_quarks, one_hot = True):
 
     labels = np.concatenate((np.zeros(nb_gluons), np.ones(nb_quarks)))
     if one_hot:
-        return utils.to_categorical(labels, 2)
+        return to_categorical(labels, 2)
     else:
         return labels
 
@@ -233,10 +218,10 @@ def zero_center(*args, channels = [], copy = False):
     assert len(args) > 0
 
     # treat channels properly
-    if len(utils.parg(channels)) == 0:
+    if len(parg(channels)) == 0:
         channels = np.arange(args[0].shape[1])
     else:
-        channels = utils.parg(channels)
+        channels = parg(channels)
 
     # compute mean of the first argument
     mean = np.mean(args[0], axis = 0)
@@ -272,10 +257,10 @@ def standardize(*args, channels = [], copy = False, reg = 10**-6):
     assert len(args) > 0
 
     # treat channels properly
-    if len(utils.parg(channels)) == 0:
+    if len(parg(channels)) == 0:
         channels = np.arange(args[0].shape[1])
     else:
-        channels = utils.parg(channels)
+        channels = parg(channels)
 
     stds = np.std(args[0], axis = 0) + reg
 
@@ -333,7 +318,7 @@ def apply_jitter(images, Y = [], which = 'all', step = 1, shuffle = True):
         z[2*n_tot:3*n_tot] = images[:,:,:,::-1] # phi flip
         z[3*n_tot:4*n_tot] = images[:n_tot,:,::-1,::-1] # eta and phi flip
         index = 4 * n_tot
-        utils.fprint('Jittered data by reflecting\n')
+        fprint('Jittered data by reflecting\n')
 
     if which == 'all' or which == 'translate':
         for i in range(-step, step + 1):
@@ -362,16 +347,16 @@ def apply_jitter(images, Y = [], which = 'all', step = 1, shuffle = True):
                     z[index:index+n_tot,:,start_iz:end_iz,start_jz:end_jz] = \
                                images[:,:,start_ix:end_ix,start_jx:end_jx]
                     index += n_tot
-                    utils.fprint('Jittered data by translating rap {}, phi {}\n'
+                    fprint('Jittered data by translating rap {}, phi {}\n'
                            .format(i,j))
 
     p = np.random.permutation(z.shape[0]) if shuffle \
                                                      else np.arange(z.shape[0])
     if len(Y) > 0:
         Y = np.concatenate([Y for i in range(n_jitter + 1)])
-        utils.fprint('After jittering, images shape: {}, Y shape: {}\n'
+        fprint('After jittering, images shape: {}, Y shape: {}\n'
                 .format(z.shape, Y.shape))
         return z[p], Y[p]
     else:
-        utils.fprint('After jittering, images shape: {}\n'.format(z.shape))
+        fprint('After jittering, images shape: {}\n'.format(z.shape))
         return z[p]

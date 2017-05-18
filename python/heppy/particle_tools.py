@@ -1,4 +1,3 @@
-import utils 
 import numpy as np
 
 # ps :: returns the 4-momenta corresponding to a list of (pT, eta, phi) in an event
