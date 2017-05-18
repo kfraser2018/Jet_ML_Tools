@@ -56,7 +56,9 @@ nano keras.json
 ```
 This should open a basic text editor with the Keras settings. Change the "backend" field to "theano" and change "image_dim_ordering" to "th". Then use `ctrl + X` to quit and save changes.
 
-4. Start another interactive python session with `python3.5` and again try importing keras with `import keras`. If everything is installed properly, it should import without errors this time.
+4. Start another interactive python session with `python3.5` and again try importing keras with `import keras`. If everything is installed properly, it should import without errors this time. You now have Keras successfully installed!
+
+There are many [Keras examples](https://github.com/fchollet/keras/tree/master/examples) that run straight out of the box. Just download the file and run it with Python. Examples include dense neural nets, convolutional neural nets, recurrent neural nets, and so on. The examples are great starting points to get some experience with Keras. If you're trying to start building a new network, these examples can be a good place to start.
 
 #### Setting up Pythia
 
@@ -68,8 +70,7 @@ Coming soon!
 
 ### Example
 
-
-Python code should be run from the `python/` directory using python 3 (version 3.5 has been the most extensively tested). There are two examples which can be invoked as
+Here are some examples that can be run from the `python/` directory using Python 3.5. There are two examples:
 ```bash
 python3 jet_image_conv_example.py
 ```
@@ -77,6 +78,8 @@ and
 ```bash
 python3 image_generation_example.py
 ```
+
+The first example trains a convolutional neural net on jet images, which may take a while if your computer doesn't have an NVIDIA GPU or if it doesn't have the GPU configured with Keras. Nonetheless, if it starts training then it means your Keras installation is working.
 
 The `src/` directory contains event generation code. Take a look at the beginning of `Events.cc` for options. Requires Pythia8 and FastJet to be installed and pythis8-config and fastjet-config to be available in the `PATH` (for the makefile to work as is). A standard invocation after compiling would look like
 ```bash
