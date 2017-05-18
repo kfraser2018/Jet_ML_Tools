@@ -54,7 +54,7 @@ That’s expected. We have to tell Keras to use Theano as its deep learning back
 cd ~/.keras/
 nano keras.json
 ```
-This should open a basic text editor with the Keras settings. Change the "backend" field to "theano" and change "image_dim_ordering" to "th". Then use `ctrl + X` to quit and save changes.
+This should open a basic text editor with the Keras settings. Change the "backend" field to "theano" and change "image_data_format" to "channels_first". Then use `ctrl + X` to quit and save changes.
 
 4. Start another interactive python session with `python3.5` and again try importing keras with `import keras`. If everything is installed properly, it should import without errors this time. You now have Keras successfully installed!
 
@@ -62,11 +62,11 @@ There are many [Keras examples](https://github.com/fchollet/keras/tree/master/ex
 
 #### Setting up Pythia
 
-Coming soon!
+Coming soon! (Current code in src/ is out of date)
 
 #### Heppy
 
-Coming soon!
+The High-Energy Physics for Python package contians some basic functionality that has been built up for 1612.01551 and related projects. It is called in the examples. More details coming soon!
 
 ### Example
 
@@ -79,7 +79,7 @@ and
 python3 image_generation_example.py
 ```
 
-The first example trains a convolutional neural net on jet images, which may take a while if your computer doesn't have an NVIDIA GPU or if it doesn't have the GPU configured with Keras. Nonetheless, if it starts training then it means your Keras installation is working.
+The first example trains a convolutional neural net on jet images, which would be sped up significantly if we were using a GPU to do the heavy lifting of training the network. Nonetheless, if it starts training then it means your Keras installation is working.
 
 The `src/` directory contains event generation code. Take a look at the beginning of `Events.cc` for options. Requires Pythia8 and FastJet to be installed and pythis8-config and fastjet-config to be available in the `PATH` (for the makefile to work as is). A standard invocation after compiling would look like
 ```bash
