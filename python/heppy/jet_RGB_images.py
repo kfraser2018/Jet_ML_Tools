@@ -11,7 +11,7 @@ charge_map = {11: -1, -11:  1, 13: -1, -13:  1, 22:  0, -22:  0,
               321:  1, -321: -1, 2112:  0, -2112:  0, 2212:  1, -2212: -1}
 
 
-def pixelate(jet, jet_center = [], img_size = 33, img_width = 0.4, nb_chan = 1, norm = True, 
+def pixelate(jet, jet_center = [], img_size = 33, img_width = 0.8, nb_chan = 1, norm = True, 
              rap_i=0, phi_i=1, pT_i=2, centers = False):
 
     """ A function for creating a jet image from a list of particles.
@@ -102,8 +102,7 @@ def pixelate(jet, jet_center = [], img_size = 33, img_width = 0.4, nb_chan = 1, 
     if norm:
         normfactor = np.sum(jet_image[:num_pt_chans])
         if normfactor == 0:
-            sys.stderr.write('ERROR: Image had no particles!')
-            sys.stderr.flush()
+            raise FloatingPointError('Image had no particles!')
             return np.zeros((nb_chan, img_size, img_size))
         else:
             jet_image[:num_pt_chans] = jet_image[:num_pt_chans]/normfactor
