@@ -23,7 +23,7 @@ To learn about quantum field theory and the standard model, read:
 
 [Keras](keras.io) is a deep learning library for Python, which wraps other powerful neural network libraries (Theano and Tensorflow) to provide a way to quickly define neural networks based on the high-level architecture.
 
-As you'll see, Keras lets you quickly implement and train the architecture you want. You can essentially add layers to your neural network in Keras with lines like `model.add(Dense(50))`.
+As you'll see, Keras lets you quickly implement and train the architecture you want. You can essentially build a network by adding layers in Keras with single lines such as `model.add(Dense(50))` to add a 50-neuron dense layer.
 
 ##### Pythia
 
