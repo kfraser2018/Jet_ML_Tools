@@ -1,5 +1,6 @@
 # Deep Learning in Particle Physics
-###### Patrick T. Komiske and Eric M. Metodiev
+###### Created by Patrick T. Komiske and Eric M. Metodiev
+###### Under modification by Katie Fraser, Lauren Niu, Baojia Tong for jet charge
 
 This is a collection of code that grew out of [1612.01551](https://arxiv.org/abs/1612.01551) and related projects. It contains Python code for processing events, computing values of observables, creating jet images from an event record, and training neural networks. It also contains Pythia event generation code.
 
