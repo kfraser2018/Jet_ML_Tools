@@ -53,7 +53,7 @@ def conv_net_construct(hps):
         model.add(Dense(n, activation = act))
         model.add(Dropout(d))
 
-    model.add(Dense(output_dim, activation = 'softmax'))
+    model.add(Dense(output_dim, activation = hps['last_act']))
 
     if comp:
         model.compile(loss = 'categorical_crossentropy', optimizer = opt(lr = lr), metrics = ['accuracy'])
