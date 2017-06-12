@@ -28,7 +28,8 @@ hps = {
     'dropout': [.1, .1, .1, .05],
     'patience': 5,
     'nb_channels': 2,
-    'model_name': 'Conv_Net_Example'
+    'model_name': 'Conv_Net_Example',
+    'last_act': 'softmax'
 }
 
 # get labels for the images
