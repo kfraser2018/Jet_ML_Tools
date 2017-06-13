@@ -18,9 +18,16 @@ PYTHIA8LIB = $(shell pythia8-config --libs)
 LIBRARIES += $(FASTJETLIB) $(PYTHIA8LIB)
 INCLUDE   += $(FASTJETINC) $(PYTHIA8INC)
 
+all: events events_lh process_events_lh
 
 events: Events.o CmdLine.o CleverStream.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBRARIES)
+
+events_lh: events_lh.o CmdLine.o CleverStream.o
+        $(CXX) -o $@ $^ $(CXXFLAGS) $(LIBRARIES)
+
+process_events_lh: process_events_lh.o CmdLine.o CleverStream.o
+        $(CXX) -o $@ $^ $(CXXFLAGS) $(LIBRARIES)
 
 Events.o: Events.cc
 	$(CXX) $(INCLUDE) -o $@ $< -c $(CXXFLAGS)
@@ -31,5 +38,10 @@ CmdLine.o: CmdLine.cc CmdLine.hh
 CleverStream.o: CleverStream.cc CleverStream.hh
 	$(CXX) -o $@ $< -c $(CXXFLAGS)
 
+events_lh.o: events_lh.cc
+        $(CXX) -o $@ $< -c $(CXXFLAGS)
+
+process_events_lh.o: process_events_lh.cc
+        $(CXX) -o $@ $< -c $(CXXFLAGS)
 clean :
 	rm -fv events *.o
