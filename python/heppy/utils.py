@@ -49,7 +49,7 @@ def get_unique_file_name(path, filename, suffix = ''):
     files = os.listdir(path)
     while counter < 10000:
         trial_name = filename + '_{}'.format(counter)
-        if trial_name + suffix not in files:
+        if trial_name + suffix + '.h5' not in files:
             full_name = trial_name + suffix
             return full_name
         else:
