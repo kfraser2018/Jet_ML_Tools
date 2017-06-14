@@ -13,7 +13,7 @@ from keras.callbacks import EarlyStopping
 
 def train_CNN(hps):
     # import existing jet images
-    jet_images = data_import('jetimage', range(1, hps['n_files'] + 1), nb_chan = 3, prefix = hps['energy'])
+    jet_images = data_import('jetimage', range(1, hps['n_files'] + 1), nb_chan = hps['nb_channels'], prefix = hps['energy'], particle1_type = hps['particle1_type'], particle2_type = hps['particle2_type'], K = hps['kappa'])
 
     # get labels for the images
     Y = heppy.make_labels(hps['n_files']*10000, hps['n_files']*10000)
@@ -22,7 +22,7 @@ def train_CNN(hps):
     X_train, Y_train, X_val, Y_val, X_test, Y_test = heppy.data_split(jet_images,Y)
 
     # Apply data augmentation
-    #X_train, Y_train = heppy.apply_jitter(X_train, Y_train)
+    X_train, Y_train = heppy.apply_jitter(X_train, Y_train)
 
     # preprocess the data
     X_train, X_val, X_test = heppy.zero_center(X_train, X_val, X_test, channels = [0])
@@ -44,6 +44,6 @@ def train_CNN(hps):
     heppy.save_model(model, name + '.h5')
 
     # construct ROC curve
-    heppy.save_ROC(model, X_test, Y_test, name, plot = False, show = False)
+    heppy.save_ROC(model, X_test, Y_test, name, plot = True, show = False)
 
 
