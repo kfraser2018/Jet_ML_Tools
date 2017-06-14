@@ -11,7 +11,7 @@ charge_map = {11: -1, -11:  1, 13: -1, -13:  1, 22:  0, -22:  0,
               321:  1, -321: -1, 2112:  0, -2112:  0, 2212:  1, -2212: -1}
 
 
-def pixelate(jet, jet_center = [], img_size = 33, img_width = 0.8, nb_chan = 1, norm = True, 
+def pixelate(jet, charge_image = False, K = 0, jet_center = [], img_size = 33, img_width = 0.8, nb_chan = 1, norm = True, 
              rap_i=0, phi_i=1, pT_i=2, centers = False):
 
     """ A function for creating a jet image from a list of particles.
@@ -72,31 +72,44 @@ def pixelate(jet, jet_center = [], img_size = 33, img_width = 0.8, nb_chan = 1, 
     rap_indices = rap_indices[mask].astype(int)
     phi_indices = phi_indices[mask].astype(int)
 
-    # construct grayscale image
-    if nb_chan == 1:
-        for ph,y,pt in zip(phi_indices, rap_indices, pts[mask]):
-            jet_image[0, ph, y] += pt
-        num_pt_chans = 1
-
-    # construct two-channel image
-    elif nb_chan == 2:
-        for ph,y,pt,label in zip(phi_indices, rap_indices, 
-                                 pts[mask], jet[mask,3]):
-            jet_image[0, ph, y] += pt
-            if charge_map[label] != 0:
-                jet_image[1, ph, y] += 1
-        num_pt_chans = 1
-
-    # construct three-channel image
-    elif nb_chan == 3:
-        for ph,y,pt,label in zip(phi_indices, rap_indices, 
-                                 pts[mask], jet[mask,3].astype(int)):
-            if charge_map[label] == 0:
-                jet_image[1, ph, y] += pt
-            else:
+    # Without Jet Charge
+    if charge_image == False:
+        # construct grayscale image
+        if nb_chan == 1:
+            for ph,y,pt in zip(phi_indices, rap_indices, pts[mask]):
                 jet_image[0, ph, y] += pt
-                jet_image[2, ph, y] += 1
-        num_pt_chans = 2
+            num_pt_chans = 1
+
+        # construct two-channel image
+        elif nb_chan == 2:
+            for ph,y,pt,label in zip(phi_indices, rap_indices, 
+                                     pts[mask], jet[mask,3]):
+                jet_image[0, ph, y] += pt
+                if charge_map[label] != 0:
+                    jet_image[1, ph, y] += 1
+            num_pt_chans = 1
+
+        # construct three-channel image
+        elif nb_chan == 3:
+            for ph,y,pt,label in zip(phi_indices, rap_indices, 
+                                     pts[mask], jet[mask,3].astype(int)):
+                if charge_map[label] == 0:
+                    jet_image[1, ph, y] += pt
+                else:
+                    jet_image[0, ph, y] += pt
+                    jet_image[2, ph, y] += 1
+            num_pt_chans = 2
+    #Using Jet Charge
+    if charge_image == True:
+        if nb_chan == 2:
+            jet_pt = np.sum(pts)
+            for ph,y,pt,label in zip(phi_indices, rap_indices, 
+                                     pts[mask], jet[mask,3].astype(int)):
+                jet_image[0, ph, y] += pt
+                jet_image[1, ph, y] += (charge_map[label] * pow(pt, K))/(pow(jet_pt,K))
+            num_pt_chans = 1
+        if nb_chan in [1,3]:
+            raise ValueError('Invalid number of channels for charged jet image, not implemented yet.')
 
     # L1-normalize the pt channels of the jet image
     if norm:
@@ -325,24 +338,24 @@ def apply_jitter(images, Y = [], which = 'all', step = 1, shuffle = True):
                 if 0 < abs(i) + abs(j) <= step:
                     if i >= 0:
                         start_ix = 0
-                        end_ix = self.img_size - i
+                        end_ix = img_size - i
                         start_iz = i
-                        end_iz = self.img_size
+                        end_iz = img_size
                     else:
                         start_ix = abs(i)
-                        end_ix = self.img_size
+                        end_ix = img_size
                         start_iz = 0
-                        end_iz = self.img_size - abs(i)
+                        end_iz = img_size - abs(i)
                     if j >= 0:
                         start_jx = 0
-                        end_jx = self.img_size - j
+                        end_jx = img_size - j
                         start_jz = j
-                        end_jz = self.img_size
+                        end_jz = img_size
                     else:
                         start_jx = abs(j)
-                        end_jx = self.img_size
+                        end_jx = img_size
                         start_jz = 0
-                        end_jz = self.img_size - abs(j)
+                        end_jz = img_size - abs(j)
                     z[index:index+n_tot,:,start_iz:end_iz,start_jz:end_jz] = \
                                images[:,:,start_ix:end_ix,start_jx:end_jx]
                     index += n_tot
