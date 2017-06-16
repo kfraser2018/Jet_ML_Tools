@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-
 # Deep Learning in Particle Physics
 =======
-# Deeeeeep Learning in Particle Physics
->>>>>>> e2fdd20763b5ec9733e3735e5ee93a18bc853f37
 ###### Created by Patrick T. Komiske and Eric M. Metodiev
 ###### Under modification by Katie Fraser, Lauren Niu, Baojia Tong for jet charge
 

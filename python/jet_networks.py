@@ -21,8 +21,8 @@ def train_CNN(hps):
     # split the data into train, validation, and test sets
     X_train, Y_train, X_val, Y_val, X_test, Y_test = heppy.data_split(jet_images,Y)
 
-    # Apply data augmentation
-    X_train, Y_train = heppy.apply_jitter(X_train, Y_train)
+    # Apply data augmentation; Katie will fix
+    #X_train, Y_train = heppy.apply_jitter(X_train, Y_train)
 
     # preprocess the data
     X_train, X_val, X_test = heppy.zero_center(X_train, X_val, X_test, channels = [0])

@@ -7,3 +7,5 @@ bin
 obj
 models
 plots
+images/*
+python/heppy/__*
