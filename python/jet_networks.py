@@ -21,23 +21,30 @@ def train_CNN(hps):
     # split the data into train, validation, and test sets
     X_train, Y_train, X_val, Y_val, X_test, Y_test = heppy.data_split(jet_images,Y)
 
-    # Apply data augmentation; Katie will fix
-    #X_train, Y_train = heppy.apply_jitter(X_train, Y_train)
-
     # preprocess the data
     X_train, X_val, X_test = heppy.zero_center(X_train, X_val, X_test, channels = [0])
     X_train, X_val, X_test = heppy.standardize(X_train, X_val, X_test, channels = [0])
-
+    
     model = NN_models.conv_net_construct(hps)
 
-    history = model.fit(X_train, Y_train,
-                        batch_size = hps['batch_size'],
-                        epochs     = hps['epochs'],
-                        callbacks  = [EarlyStopping(monitor = 'val_loss', 
-                                                    patience = hps['patience'], 
-                                                    verbose = 1, 
-                                                    mode = 'auto')],
-                        validation_data = (X_val, Y_val))
+    # Divide data into smaller chunks for data augmentation
+    X_split = np.split(X_train, hps['n_files'])
+    Y_split = np.split(Y_train, hps['n_files'])
+
+    # Data Augmentation and Train for Each Subset
+    for i in range(hps['n_files']):
+        print('File_number: ' + str(i+1))
+        X_aug, Y_aug = heppy.apply_jitter(X_split[0], Y_split[0])
+        del X_split[0]
+        del Y_split[0]
+        history = model.fit(X_aug, Y_aug,
+                            batch_size = hps['batch_size'],
+                            epochs     = hps['epochs'],
+                            callbacks  = [EarlyStopping(monitor = 'val_loss', 
+                                                        patience = hps['patience'], 
+                                                        verbose = 1, 
+                                                        mode = 'auto')],
+                            validation_data = (X_val, Y_val))
  
     # get a unique name to save the model as
     name = heppy.get_unique_file_name('../models', hps['model_name'],'_' + hps['energy'] + '_' + hps['last_act'])
