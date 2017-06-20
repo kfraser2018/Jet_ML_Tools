@@ -70,8 +70,9 @@ def abstract_ROC(classifier, labels, num_points = 1000):
     return class0_eff, class1_eff
 
 
-def save_ROC(model, X_test, Y_test, name, num_points = 1000, 
-             plot = False, path = '../plots', show = True):
+def save_ROC(model, X_test, Y_test, name, num_points = 1000, plot = False,
+             particle2_name = 'Quark', particle1_name = 'Gluon', 
+             path = '../plots', show = True):
 
     """ Constructs a ROC curve from a model, plots it if desired, and saves
     the quark and gluon efficiencies to file using pickle. 
@@ -88,17 +89,17 @@ def save_ROC(model, X_test, Y_test, name, num_points = 1000,
     # ensure that the directory we're trying to save to exists
     os.makedirs(path, exist_ok = True)
 
-    quark_eff, gluon_eff = ROC_from_model(model, X_test, Y_test, num_points)
+    particle2_eff, particle1_eff = ROC_from_model(model, X_test, Y_test, num_points)
 
     base_name = name.split('.')[0]
     filename = os.path.join(path, base_name)
     with open(filename + '_ROC_data.pickle', 'wb') as f:
-        pickle.dump({'quark_eff': quark_eff, 'gluon_eff': gluon_eff}, f)
+        pickle.dump({'particle2_eff': particle2_eff, 'particle1_eff': particle1_eff}, f)
 
     print('\nSaving ROC data for {}'.format(base_name))
 
     if plot:
-        plot_ROC(quark_eff, gluon_eff, show = False)
+        plot_ROC(particle2_eff, particle1_eff, show = False, particle2_name = particle2_name, particle1_name = particle1_name)
         plt.savefig(filename + '_ROC_plot.pdf', bbox_inches = 'tight')
         if show:
             plt.show()
@@ -111,23 +112,23 @@ def load_ROC(file, path = '../plots'):
 
     with open(os.path.join(path, file), 'rb') as f:
         data = pickle.load(f)
-        return data['quark_eff'], data['gluon_eff']
+        return data['particle2_eff'], data['particle1_eff']
 
 
-def plot_ROC(quark_eff, gluon_eff, color = 'blue', label = '', show = True):
+def plot_ROC(particle2_eff, particle1_eff, color = 'blue', label = '', show = True, particle2_name = 'Quark', particle1_name = 'Gluon'):
 
-    """ Plots to default axes the ROC curve given by quark_eff and gluon_eff.
+    """ Plots to default axes the ROC curve given by particle1_eff and particle2_eff.
 
     color: the color to use
     label: what to label the curve
     """
 
-    plt.plot(quark_eff, gluon_eff, color = color, label = label)
+    plt.plot(particle2_eff, particle1_eff, color = color, label = label)
     plt.xticks(np.linspace(0,1,11))
     plt.yticks(np.linspace(0,1,11))
-    plt.xlabel('Quark Signal Efficiency')
-    plt.ylabel('Gluon Signal Efficiency')
-    plt.title('Area Under ROC Curve: {:.4f}'.format(ROC_area(quark_eff, gluon_eff)))
+    plt.xlabel(particle2_name + ' Signal Efficiency')
+    plt.ylabel(particle1_name + ' Signal Efficiency')
+    plt.title('Area Under ROC Curve: {:.4f}'.format(ROC_area(particle2_eff, particle1_eff)))
     if show:
         plt.show()
 

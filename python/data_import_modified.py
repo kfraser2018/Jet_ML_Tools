@@ -42,12 +42,11 @@ def data_import(data_type, seed_range, seed_number = 1, particle_type = '',
     if data_type == 'jetimage':
         particle1_string = prefix + '-' + particle1_type + '-K=' + str(K) + '-jetimage-seed{}_33x33images_' + str(nb_chan) + 'chan.npz'
         particle2_string = prefix + '-' + particle2_type + '-K=' + str(K) + '-jetimage-seed{}_33x33images_' + str(nb_chan) + 'chan.npz'
-        #gluon_string = prefix + 'gluon-jetimage-seed{}_33x33images_' + str(nb_chan) + 'chan.npz'
-        #quark_string = prefix + 'quark-jetimage-seed{}_33x33images_' + str(nb_chan) + 'chan.npz'
         return heppy.load_images([particle1_string.format(x) for x in seed_range],
                                  [particle2_string.format(x) for x in seed_range],
                                  nevents * len(seed_range), nevents * len(seed_range), 
                                  nb_chan = nb_chan)
+
     elif data_type == 'event':
         jets = []
         jet_tots = []

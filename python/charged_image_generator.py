@@ -4,6 +4,7 @@
 # create the jet images, and save them to file.
 
 import heppy
+from heppy import jet_RGB_images
 from data_import_modified import data_import
 import numpy as np
 import math

@@ -11,6 +11,8 @@ from heppy import jet_RGB_images
 from data_import_modified import data_import
 from keras.callbacks import EarlyStopping
 
+n_parts = 1
+
 def train_CNN(hps):
     # import existing jet images
     jet_images = data_import('jetimage', range(1, hps['n_files'] + 1), nb_chan = hps['nb_channels'], prefix = hps['energy'], particle1_type = hps['particle1_type'], particle2_type = hps['particle2_type'], K = hps['kappa'])
@@ -27,30 +29,42 @@ def train_CNN(hps):
     
     model = NN_models.conv_net_construct(hps)
 
-    # Divide data into smaller chunks for data augmentation
-    X_split = np.split(X_train, hps['n_files'])
-    Y_split = np.split(Y_train, hps['n_files'])
+    if hps['data_augment'] is True:
+        # Divide data into smaller chunks for data augmentation
+        X_split = np.split(X_train, hps['n_files']*n_parts)
+        Y_split = np.split(Y_train, hps['n_files']*n_parts)
 
-    # Data Augmentation and Train for Each Subset
-    for i in range(hps['n_files']):
-        print('File_number: ' + str(i+1))
-        X_aug, Y_aug = heppy.apply_jitter(X_split[0], Y_split[0])
-        del X_split[0]
-        del Y_split[0]
-        history = model.fit(X_aug, Y_aug,
+        # Data Augmentation and Train for Each Subset
+        for i in range(hps['n_files']*n_parts):
+            print('File_number: ' + str((i+1)/n_parts))
+            X_aug, Y_aug = heppy.apply_jitter(X_split[0], Y_split[0])
+            del X_split[0]
+            del Y_split[0]
+            history = model.fit(X_aug, Y_aug,
+                                batch_size = hps['batch_size'],
+                                epochs     = hps['epochs'],
+                                callbacks  = [EarlyStopping(monitor = 'val_loss', 
+                                                            patience = hps['patience'], 
+                                                            verbose = 1, 
+                                                            mode = 'auto')],
+                                validation_data = (X_val, Y_val))
+    if hps['data_augment'] is False:
+        history = model.fit(X_train, Y_train,
                             batch_size = hps['batch_size'],
                             epochs     = hps['epochs'],
-                            callbacks  = [EarlyStopping(monitor = 'val_loss', 
-                                                        patience = hps['patience'], 
-                                                        verbose = 1, 
+                            callbacks  = [EarlyStopping(monitor = 'val_loss',
+                                                        patience = hps['patience'],
+                                                        verbose = 1,
                                                         mode = 'auto')],
-                            validation_data = (X_val, Y_val))
- 
+                            validation_data = (X_val, Y_val)) 
+
     # get a unique name to save the model as
-    name = heppy.get_unique_file_name('../models', hps['model_name'],'_' + hps['energy'] + '_' + hps['last_act'])
+    name = heppy.get_unique_file_name('../models', hps['model_name'],
+           '_' + hps['energy'] + '_' + hps['particle1_type'] + '_' 
+           + hps['particle2_type'])
     heppy.save_model(model, name + '.h5')
 
     # construct ROC curve
-    heppy.save_ROC(model, X_test, Y_test, name, plot = True, show = False)
+    heppy.save_ROC(model, X_test, Y_test, name, plot = True, show = False, particle1_name = hps['particle1_type'], particle2_name = hps['particle2_type'])
 
 
