@@ -19,8 +19,10 @@ def generator(hps, X_train, Y_train):
                 X_batch = np.stack([X_train[i,:,:,:] for i in range(counter, counter + hps['batch_size'])])
                 Y_batch = np.stack([Y_train[i,:] for i in range(counter, counter + hps['batch_size'])])
             else:
+                print("DEBUG")
                 X_batch = np.stack(([X_train[i,:,:,:] for i in range(counter, len(X_train))],[X_train[i,:,:,:] for i in range(0, (counter + hps['batch_size'])%len(X_train))]))
                 Y_batch = np.stack(([Y_train[i,:] for i in range(counter, len(X_train))],[X_train[i,:] for i in range(0, (counter + hps['batch_size'])%len(X_train))]))
+            counter += hps['batch_size']
             X_aug, Y_aug = apply_jitter(X_batch,Y_batch)
             yield X_aug, Y_aug
 
