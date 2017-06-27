@@ -15,7 +15,7 @@ import heppy
 
 def data_import(data_type, seed_range, seed_number = 1, particle_type = '', 
                 prefix = '', path = '', nevents = 10000, img_size = 33, nb_chan = 1, 
-                particle1_type = 'gluon', particle2_type = 'quark', K = 0):
+                particle1_type = 'gluon', particle2_type = 'quark', K = 0, K_two = 0):
 
     """ Imports data produced by the Events.cc script into python. Note that both
     gluon and quark files must be present for the desired seed range. The gluons 
@@ -40,8 +40,8 @@ def data_import(data_type, seed_range, seed_number = 1, particle_type = '',
         path = '../events' if data_type == 'event' else '../images'
 
     if data_type == 'jetimage':
-        particle1_string = prefix + '-' + particle1_type + '-K=' + str(K) + '-jetimage-seed{}_33x33images_' + str(nb_chan) + 'chan.npz'
-        particle2_string = prefix + '-' + particle2_type + '-K=' + str(K) + '-jetimage-seed{}_33x33images_' + str(nb_chan) + 'chan.npz'
+        particle1_string = prefix + '-' + particle1_type + '-K=' + str(K) + '-K2=' + str(K_two) + '-jetimage-seed{}_33x33images_' + str(nb_chan) + 'chan.npz'
+        particle2_string = prefix + '-' + particle2_type + '-K=' + str(K) + '-K2=' + str(K_two) + '-jetimage-seed{}_33x33images_' + str(nb_chan) + 'chan.npz'
         return heppy.load_images([particle1_string.format(x) for x in seed_range],
                                  [particle2_string.format(x) for x in seed_range],
                                  nevents * len(seed_range), nevents * len(seed_range), 
