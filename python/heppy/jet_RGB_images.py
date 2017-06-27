@@ -4,6 +4,7 @@
 
 from .utils import *
 from time import clock
+#from keras.preprocessing.image import ImageDataGenerator
 
 # mapping from particle id to charge of the particle 
 charge_map = {11: -1, -11:  1, 13: -1, -13:  1, 22:  0, -22:  0, 
@@ -11,7 +12,7 @@ charge_map = {11: -1, -11:  1, 13: -1, -13:  1, 22:  0, -22:  0,
               321:  1, -321: -1, 2112:  0, -2112:  0, 2212:  1, -2212: -1}
 
 
-def pixelate(jet, charge_image = False, K = 0, jet_center = [], img_size = 33, img_width = 0.8, nb_chan = 1, norm = True, 
+def pixelate(jet, charge_image = False, K = 0, K_two = 0, jet_center = [], img_size = 33, img_width = 0.8, nb_chan = 1, norm = True, 
              rap_i=0, phi_i=1, pT_i=2, centers = False):
 
     """ A function for creating a jet image from a list of particles.
@@ -108,7 +109,15 @@ def pixelate(jet, charge_image = False, K = 0, jet_center = [], img_size = 33, i
                 jet_image[0, ph, y] += pt
                 jet_image[1, ph, y] += (charge_map[label] * pow(pt, K))/(pow(jet_pt,K))
             num_pt_chans = 1
-        if nb_chan in [1,3]:
+        if nb_chan == 3:
+            jet_pt = np.sum(pts)
+            for ph,y,pt,label in zip(phi_indices, rap_indices,
+                                     pts[mask], jet[mask,3].astype(int)):
+                jet_image[0, ph, y] += pt
+                jet_image[1, ph, y] += (charge_map[label] * pow(pt, K))/(pow(jet_pt,K))
+                jet_image[2, ph, y] += (charge_map[label] * pow(pt, K_two))/(pow(jet_pt,K_two))
+            num_pt_chans = 1            
+        if nb_chan == 1:
             raise ValueError('Invalid number of channels for charged jet image, not implemented yet.')
 
     # L1-normalize the pt channels of the jet image
@@ -330,7 +339,7 @@ def apply_jitter(images, Y = [], which = 'all', step = 1, shuffle = True):
         z[2*n_tot:3*n_tot] = images[:,:,:,::-1] # phi flip
         z[3*n_tot:4*n_tot] = images[:n_tot,:,::-1,::-1] # eta and phi flip
         index = 4 * n_tot
-        fprint('Jittered data by reflecting\n')
+       # fprint('Jittered data by reflecting\n')
 
     if which == 'all' or which == 'translate':
         for i in range(-step, step + 1):
@@ -359,16 +368,40 @@ def apply_jitter(images, Y = [], which = 'all', step = 1, shuffle = True):
                     z[index:index+n_tot,:,start_iz:end_iz,start_jz:end_jz] = \
                                images[:,:,start_ix:end_ix,start_jx:end_jx]
                     index += n_tot
-                    fprint('Jittered data by translating rap {}, phi {}\n'
-                           .format(i,j))
+                    #fprint('Jittered data by translating rap {}, phi {}\n'
+                    #       .format(i,j))
 
     p = np.random.permutation(z.shape[0]) if shuffle \
                                                      else np.arange(z.shape[0])
     if len(Y) > 0:
         Y = np.concatenate([Y for i in range(n_jitter + 1)])
-        fprint('After jittering, images shape: {}, Y shape: {}\n'
-                .format(z.shape, Y.shape))
+        #fprint('After jittering, images shape: {}, Y shape: {}\n'
+        #        .format(z.shape, Y.shape))
         return z[p], Y[p]
     else:
-        fprint('After jittering, images shape: {}\n'.format(z.shape))
+        #fprint('After jittering, images shape: {}\n'.format(z.shape))
         return z[p]
+
+'''def generator(hps, X_train, Y_train):
+    if hps['nb_channels'] in {1,3}:
+        datagen = ImageDataGenerator()
+        for X_batch, Y_batch in datagen.flow(X_train, Y_train, batch_size=hps['batch_size']):
+            X_aug, Y_aug = apply_jitter(X_batch,Y_batch)
+            yield X_aug, Y_aug 
+    if hps['nb_channels'] == 2:
+        X_batch = np.zeros((hps['batch_size'],hps['nb_channels'],hps['img_size'],hps['img_size']))
+        Y_batch = np.zeros((hps['batch_size'],hps['nb_channels']))
+        counter = 0
+        while True:
+            m = 0
+            for i in range(counter, counter + hps['batch_size']):
+                for j in range(hps['nb_channels']):
+                    for k in range(hps['img_size']):
+                        for l in range(hps['img_size']):
+                            X_batch[m,j,k,l] = X_train[i % len(X_train),j,k,l]
+                    Y_batch[m,j] = Y_train[i % len(X_train),j]
+                m += 1
+                counter += hps['batch_size']
+                counter = counter % len(X_train)
+            X_aug, Y_aug = apply_jitter(X_batch,Y_batch)
+            yield X_aug, Y_aug '''
