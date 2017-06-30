@@ -19,26 +19,11 @@ hps = config.hps
 n_files = hps['n_files']
 n_ev_perf = 10000
 
-#allocate array
-jet_charges = np.zeros(2 * n_files * n_ev_perf)
-index = 0
-            
-# Loop through quark and gluon events
-for particle_type in [hps["particle1_type"], hps["particle2_type"]]:
-    # Loop through seed number
-    for seed_number in range(1,1 + hps["n_files"]):
-        # import the jets
-        jets, jet_tots = data_import('event', range(1,1 + hps["n_files"]), seed_number, particle_type, prefix = hps["energy"])
+jets, jet_tots = heppy.get_jets(hps)
+jet_charges = heppy.jet_charges(hps, jets)
 
-        # fill array of jet charges
-        for jet in jets:
-            jet_charges[index] = heppy.compute_jet_charge(jet, hps)
-            index += 1
-
-#Plot Jet Charge Histogram
-#plt.hist(jet_charges[0:n_files * n_ev_perf],100)
-#plt.hist(jet_charges[n_files * n_ev_perf:2*n_files * n_ev_perf],100,facecolor='green')
-#plt.show()
+#Uncomment to Plot Jet Charge Histogram
+heppy.plot_jet_charges(jet_charges,hps)
 
 # Get labels for jets
 labels = np.concatenate((np.zeros(n_files * n_ev_perf),np.ones(n_files * n_ev_perf)))
@@ -47,7 +32,8 @@ labels = np.concatenate((np.zeros(n_files * n_ev_perf),np.ones(n_files * n_ev_pe
 fpr, tpr, thresholds = metrics.roc_curve(labels, jet_charges)
 
 # Plot ROC curve
-#plt.plot(1-tpr, fpr)
+plt.plot(1-tpr, fpr)
+plt.show()
 file_name = '../plots/jet_charge_' + hps['energy'] + '_' + hps['particle1_type']            + '_' + hps['particle2_type'] + '_K=' + str(hps['kappa']) + '_ROC_data.pickle' 
 with open(file_name, 'wb') as f:
     pickle.dump({'particle2_eff': 1 - tpr, 'particle1_eff': fpr}, f)
