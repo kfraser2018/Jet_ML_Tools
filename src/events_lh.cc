@@ -22,7 +22,10 @@ int main(int argc, char** argv) {
   CmdLine cmdline(argc, argv);
 
   // Settings
-  int    nEvent    = cmdline.value("-nev", 200000);
+  int    nEvent    = cmdline.value("-nev", 50000);
+  double pthatmin  = cmdline.value("-pthatmin", 25.);
+  double pthatmax  = cmdline.value("-pthatmax", -1.);
+  double ptpow     = cmdline.value("-ptpow", -1.);
   bool   qcd       = cmdline.present("-allqcd");
   bool   Zg        = cmdline.present("-Zg");
   bool   Zq        = cmdline.present("-Zq");
@@ -60,6 +63,12 @@ int main(int argc, char** argv) {
   // Random seed
   pythia.settings.flag("Random:setSeed", true);
   pythia.settings.mode("Random:seed", seed);
+
+  // generation cuts and ptpow
+  pythia.settings.parm("PhaseSpace:pTHatMin", pthatmin);
+  pythia.settings.parm("PhaseSpace:pTHatMax", pthatmax);
+  pythia.settings.parm("PhaseSpace:bias2SelectionPow", ptpow);
+  pythia.settings.flag("PhaseSpace:bias2Selection", ptpow >= 0 ? true : false);
 
   // Switch off generation of steps subsequent to the process level one.
   // (These will not be stored anyway, so only steal time.)

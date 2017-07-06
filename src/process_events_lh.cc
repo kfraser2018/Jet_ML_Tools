@@ -32,19 +32,11 @@ int main(int argc, char** argv) {
   double etaMax    = cmdline.value("-etamax", 2.5);
   double ptjetmin  = cmdline.value("-ptjetmin", 50.);
   double ptjetmax  = cmdline.value("-ptjetmax", 10000.);
-  string infile_name  = cmdline.value<string>("-in","-");
+  string infile  = cmdline.value<string>("-in","-");
   string outfile  = cmdline.value<string>("-out","-");
   int    seed      = cmdline.value("-seed", 0);
 
-  //Set up to read in multiple .lhe files  
-  int n_infiles = 10;
-  vector<string> infiles(n_infiles);
-  for (int i = 0; i < 10; i++){
-    int infile_label = seed*10+i+1;
-    infiles[i] = infile_name + to_string(infile_label)+ ".lhe";
-  }
-  int iFile = 1;
- 
+  cout << infile << endl; 
   // output setup
   CleverOFStream outstream(outfile);
   outstream << "# " << cmdline.command_line() << endl;
@@ -78,7 +70,7 @@ int main(int argc, char** argv) {
 
   // Initialize Les Houches Event File run. List initialization information.
   pythia.readString("Beams:frameType = 4");
-  pythia.readString("Beams:LHEF =" + infiles[0]);
+  pythia.readString("Beams:LHEF =" + infile);
   pythia.init();
   
   // Jet clustering setup
@@ -108,25 +100,18 @@ int main(int argc, char** argv) {
     if (!pythia.next()) {
 
       // If failure because reached end of file then exit event loop.
-      if (pythia.info.atEndOfFile()) {
-        if (iFile != 9){
-          pythia.readString("Beams:newLHEFsameInit = on");
-          pythia.readString("Beams:LHEF =" + infiles[iFile]);
-          pythia.init();
-          iFile++;
-          continue;}
-        if (iFile == n_infiles - 1) {break;}
+      if (pythia.info.atEndOfFile()) {break;}
 
       // Otherwise continue
       else {continue;}
-    }}
+    }
 
     // Reset Fastjet input
     particles.resize(0);
 
     // Loop over event record to decide what to pass to FastJet
     for (int i = 0; i < pythia.event.size(); ++i) {
-      if (pythia.event[i].status() == -23) {cout << pythia.event[i].id() << endl;}
+      //if (pythia.event[i].status() == -23) {cout << pythia.event[i].id() << endl;}
 
       // Final state only, no neutrinoutstream
       if (!pythia.event[i].isFinal() ||

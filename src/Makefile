@@ -7,8 +7,9 @@ endif
 
 CXXFLAGS = -O2 -Wall -std=c++0x
 
+BOOST     += -I/usr/local/bin/boost_1_64_0
 INCLUDE   += -DHAVEBOOST
-LIBRARIES += -lboost_iostreams
+LIBRARIES += -lboost_iostreams -ldl
 
 FASTJETINC = $(shell fastjet-config --cxxflags)
 PYTHIA8INC = $(shell pythia8-config --cxxflags)
@@ -24,24 +25,24 @@ events: Events.o CmdLine.o CleverStream.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBRARIES)
 
 events_lh: events_lh.o CmdLine.o CleverStream.o
-        $(CXX) -o $@ $^ $(CXXFLAGS) $(LIBRARIES)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBRARIES)
 
 process_events_lh: process_events_lh.o CmdLine.o CleverStream.o
-        $(CXX) -o $@ $^ $(CXXFLAGS) $(LIBRARIES)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBRARIES)
 
 Events.o: Events.cc
 	$(CXX) $(INCLUDE) -o $@ $< -c $(CXXFLAGS)
 
 CmdLine.o: CmdLine.cc CmdLine.hh
-	$(CXX) -o $@ $< -c $(CXXFLAGS)
+	$(CXX) $(BOOST) -o $@ $< -c $(CXXFLAGS)
 
 CleverStream.o: CleverStream.cc CleverStream.hh
-	$(CXX) -o $@ $< -c $(CXXFLAGS)
+	$(CXX) $(BOOST) -o $@ $< -c $(CXXFLAGS)
 
 events_lh.o: events_lh.cc
-        $(CXX) -o $@ $< -c $(CXXFLAGS)
+	$(CXX) $(INCLUDE) $(BOOST) -o $@ $< -c $(CXXFLAGS)
 
 process_events_lh.o: process_events_lh.cc
-        $(CXX) -o $@ $< -c $(CXXFLAGS)
+	$(CXX) $(INCLUDE) $(BOOST) -o $@ $< -c $(CXXFLAGS)
 clean :
 	rm -fv events *.o
