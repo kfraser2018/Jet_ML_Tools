@@ -1,4 +1,4 @@
-# Katherine Fraser, MIT, 2017
+# Katherine Fraser, Harvard University, 2017
 #
 # Calculates pT weighted jet charge and makes ROC curve for it
 
