@@ -6,4 +6,5 @@ Events were generated using pythia 8.2 in two steps. First .lhe files were gener
 '''
 ./process_events_lh -out ../events/100GEV-upantiquark-event-seed1.txt -in lhe_files/upantiquark-seed -ptjetmin 100 -ptjetmax 120 -seed 1
 '''
+If using slurm, the script process_events.sh runs process_events_lh for multiple seed numbers in parallel.
 
