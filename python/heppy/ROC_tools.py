@@ -132,16 +132,19 @@ def plot_ROC(particle2_eff, particle1_eff, color = 'blue', label = '', show = Tr
     if show:
         plt.show()
 
-def plot_ROC_2var(particle2_eff_1, particle1_eff_1, particle2_eff_2, particle1_eff_2, label1 = '', label2 = '', title = '', show = True, particle1_name = 'Gluon', particle2_name = 'Quark'):
+
+def plot_ROC_Nvar(particle2_effs, particle1_effs, labels = '', title = '', show = True, colors = '', particle1_name = 'Gluon', particle2_name = 'Quark'):
 
     """ Plots to default axes the ROC curve given by quark_eff and gluon_eff.
 
     color: the color to use
     label: what to label the curve
     """
-
-    plt.plot(particle2_eff_1, particle1_eff_1, 'b',label = label1)
-    plt.plot(particle2_eff_2, particle1_eff_2, 'r',label = label2)
+    if colors == '':
+        print("ERROR: Please choose colors")
+        return
+    for (particle1_eff, particle2_eff, label, color) in zip(particle1_effs, particle2_effs, labels, colors):
+        plt.plot(particle2_eff, particle1_eff, color,label = label)
     plt.xticks(np.linspace(0,1,11))
     plt.yticks(np.linspace(0,1,11))
     plt.xlabel(particle2_name + ' Signal Efficiency')
@@ -175,8 +178,8 @@ def plot_inv_ROC(quark_eff, gluon_eff, color = 'blue', label = '',
         plt.show()
 
 
-def plot_SI(quark_eff, gluon_eff, color = 'blue', label = '',
-            xlim = [.05, 1], ylim = [0, 2.5], show = True):
+def plot_SI(particle2_eff, particle1_eff, color = 'blue', label = '',
+            xlim = [.05, 1], ylim = [0, 2.5], show = True, particle1_name = 'Quark'):
     
     """ Plots to default axes the significance improvement curve given by
     quark_eff and gluon_eff.
@@ -187,16 +190,17 @@ def plot_SI(quark_eff, gluon_eff, color = 'blue', label = '',
     ylim: the range of y values to show
     """
 
-    plt.plot(*SI(quark_eff, gluon_eff), color = color, label = label)
+    plt.plot(*SI(particle2_eff, particle1_eff), color = color, label = label)
     plt.xticks(np.linspace(0,1,11))
     plt.xlim(*xlim)
     plt.ylim(*ylim)
-    plt.xlabel('Quark Signal Efficiency')
+    plt.xlabel(particle1_name + ' Signal Efficiency')
     plt.ylabel('Significance Improvement')
     if show:
         plt.show()
 
-def plot_SI_2var(particle2_eff_1, particle1_eff_1, particle2_eff_2, particle1_eff_2, label1 = '', label2 = '', title = '', xlim = [.02, 1], ylim = [0, 2.5], show = True, particle2_name = 'Quark'):
+
+def plot_SI_Nvar(particle2_effs, particle1_effs, labels = '', title = '', xlim = [.02, 1], ylim = [0, 2.5], show = True, particle2_name = 'Quark', colors = ''):
     
     """ Plots to default axes the significance improvement curve given by
     quark_eff and gluon_eff.
@@ -207,17 +211,22 @@ def plot_SI_2var(particle2_eff_1, particle1_eff_1, particle2_eff_2, particle1_ef
     ylim: the range of y values to show
     """
 
-    plt.plot(*SI(particle2_eff_1, particle1_eff_1),'b',label = label1)
-    plt.plot(*SI(particle2_eff_2, particle1_eff_2),'r',label = label2)
+    if colors == '':
+        print("ERROR: Please choose colors")
+        return
+
+    for (particle1_eff, particle2_eff, label, color) in zip(particle1_effs, particle2_effs, labels, colors):
+        plt.plot(*SI(particle2_eff, particle1_eff),color,label = label)
     plt.xticks(np.linspace(0,1,11))
     plt.xlim(*xlim)
     plt.ylim(*ylim)
-    plt.xlabel(particle2_name + 'Signal Efficiency')
+    plt.xlabel(particle2_name + ' Signal Efficiency')
     plt.ylabel('Significance Improvement')
     plt.title(title)
     plt.legend()
     if show:
         plt.show()
+
 
 
 def ROC_area(qe, ge):
