@@ -5,13 +5,34 @@
 import heppy
 import plot_config
 hps = plot_config.hps
-file1= 'Test_Parameters_0_100GEV_upquark_downquark_K=02_do=01_03_03_03_ROC_data.pickle'
-file2 = 'jet_charge_100GEV_upquark_downquark_K=0.4_ROC_data.pickle'
-file1_label = 'new parameters NN' 
-file2_label = 'old_best'
-qe, ge = heppy.load_ROC(file1)
-qe2, ge2 = heppy.load_ROC(file2)
 
-heppy.plot_ROC_2var(qe,ge,qe2,ge2,title = '100 GEV', label1= file1_label, label2 = file2_label, particle1_name = hps['particle1_type'], particle2_name = hps['particle2_type'])
-heppy.plot_SI_2var(qe,ge,qe2,ge2,title = '100 GEV', label1= file1_label, label2 = file2_label, particle2_name = hps['particle2_type'])
+# Choose Files
+files = []
+files.append('jet_charge_100GEV_upquark_downquark_K=0.1_ROC_data.pickle')
+files.append('jet_charge_100GEV_upquark_downquark_K=0.2_ROC_data.pickle')
+files.append('jet_charge_100GEV_upquark_downquark_K=0.3_ROC_data.pickle')
+files.append('jet_charge_100GEV_upquark_downquark_K=0.4_ROC_data.pickle')
+files.append('jet_charge_100GEV_upquark_downquark_K=0.5_ROC_data.pickle')
+files.append('jet_charge_100GEV_upquark_downquark_K=0.6_ROC_data.pickle')
+
+# Make labels
+labels = []
+labels.append('Jet Charge Kappa=0.1')
+labels.append('Jet Charge Kappa=0.2')
+labels.append('Jet Charge Kappa=0.3')
+labels.append('Jet Charge Kappa=0.4')
+labels.append('Jet Charge Kappa=0.5')
+labels.append('Jet Charge Kappa=0.6')
+
+qes = []
+ges = []
+for file in files:
+    qe, ge = heppy.load_ROC(file)
+    qes.append(qe)
+    ges.append(ge)
+
+colors = ['r', 'b', 'y', 'k', 'm', 'c']
+
+heppy.plot_ROC_Nvar(qes,ges,title = '100 GEV', labels = labels, particle1_name = hps['particle1_type'], particle2_name = hps['particle2_type'], colors = colors)
+heppy.plot_SI_Nvar(qes,ges,title = '100 GEV', labels = labels, particle2_name = hps['particle2_type'], colors = colors)
 
